@@ -1,0 +1,1 @@
+hyperfine --warmup 3 --min-runs 100 'target/release/wormle'
