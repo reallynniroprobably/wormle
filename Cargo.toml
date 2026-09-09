@@ -1,0 +1,16 @@
+[package]
+name = "wormle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+rayon = "1.12.0"
+
+[profile.release]
+opt-level = 3        # 0-3, "s" (size), "z" (min size). 3 is max speed, default for release.
+lto = "fat"           # "fat" (whole-program LTO), "thin" (faster to compile, most of the benefit), or false
+codegen-units = 1     # Fewer units = better optimization, slower compile. Default is 16.
+panic = "abort"       # Skips unwinding machinery — smaller/faster, but no catch_unwind
+strip = true          # Strips symbols/debuginfo from the binary — smaller binary
+debug = false         # No debug info in release (default false already)
