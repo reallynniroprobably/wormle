@@ -47,34 +47,37 @@ enum LetterState {
     Absent
 }
 
+#[inline(always)]
 fn evaluate(guess: &Word, answer: &Word) -> [LetterState; 5] {
-    let mut result: [LetterState; 5] = [LetterState::Absent; 5];
-    let mut linked: [Option<usize>; 5] = [None; 5];
+    let mut result = [LetterState::Absent; 5];
+    let mut counts = [0u8; 26]; // Tracks unused letter frequencies in `answer`
 
-    // Get correct ones first
-    for (i, c) in guess.iter().enumerate() {
-        if answer[i] == *c {
+    // Pass 1: Mark Correct (Green) matches & count remaining available letters in `answer`
+    for i in 0..5 {
+        if guess[i] == answer[i] {
             result[i] = LetterState::Correct;
-            linked[i] = Some(i);
+        } else {
+            // Fast ASCII index mapping assuming bytes 'a'-'z' or 'A'-'Z'
+            let idx = (answer[i] % 32 - 1) as usize; 
+            counts[idx] += 1;
         }
     }
 
-    for (i, c) in guess.iter().enumerate() {
-        if let LetterState::Correct = result[i] { continue; }
-
-        result[i] = LetterState::Absent;
-        for (ai, ac) in answer.iter().enumerate() {
-            if ac == c && linked[ai] == None {
+    // Pass 2: Mark Present (Yellow) matches without nested loops
+    for i in 0..5 {
+        if result[i] != LetterState::Correct {
+            let idx = (guess[i] % 32 - 1) as usize;
+            if counts[idx] > 0 {
                 result[i] = LetterState::Present;
-                linked[ai] = Some(i);
-                break;
+                counts[idx] -= 1;
             }
         }
     }
-    
+
     result
 }
 
+#[inline(always)]
 fn cached(states: &[LetterState; 5]) -> u8 {
     let mut code = 0u8;
     
