@@ -13,4 +13,4 @@ lto = "fat"           # "fat" (whole-program LTO), "thin" (faster to compile, mo
 codegen-units = 1     # Fewer units = better optimization, slower compile. Default is 16.
 panic = "abort"       # Skips unwinding machinery — smaller/faster, but no catch_unwind
 strip = true          # Strips symbols/debuginfo from the binary — smaller binary
-debug = false         # No debug info in release (default false already)
+debug = true        # No debug info in release (default false already)
