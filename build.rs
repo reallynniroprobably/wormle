@@ -21,10 +21,12 @@ fn main() {
     let output = format!(
         "pub const GUESSES: [[char; 5]; {}] = {:?};\n\
          pub const ANSWERS: [[char; 5]; {}] = {:?};\n\
-         pub const ANSWER_COUNT: usize = {};\n",
+         pub const ANSWER_COUNT: usize = {};\n\
+         pub const GUESS_COUNT: usize = {};\n",
         guesses_result.len(), guesses_result,
         answers_result.len(), answers_result,
-        answers_result.len()
+        answers_result.len(),
+        guesses_result.len()
     );
 
     fs::write(&dest_path, output).unwrap();

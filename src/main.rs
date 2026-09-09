@@ -6,15 +6,10 @@ type Word = [char; 5];
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 fn main() -> Result<()> {
-    let mut guesses: Vec<(Word, f32)> = {
-        let guesses = GUESSES
-            .into_iter()
-            .map(|guess| (guess, 0.0))
-            .collect();
-
-        guesses
-    };
-    let answers: Vec<Word> = ANSWERS.to_vec();
+    let mut guesses: [(Word, f32); GUESS_COUNT] = std::array::from_fn(|i| {
+        (GUESSES[i], 0.0_f32)
+    });
+    let answers: [Word; ANSWER_COUNT] = ANSWERS;
 
     guesses.par_iter_mut().for_each(|(guess, avg_surprise)| {
         let mut cache: [f32; 243] = [0.0; 243];
