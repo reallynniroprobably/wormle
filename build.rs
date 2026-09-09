@@ -1,6 +1,7 @@
 use std::env;
 use std::fs;
 use std::path::Path;
+use rayon::prelude::*;
 
 fn main() {
     // Only rerun this script if the word lists actually change.
@@ -11,10 +12,10 @@ fn main() {
     let dest_path = Path::new(&out_dir).join("data.rs"); // no leading slash
 
     let guesses = fs::read_to_string("data/guesses.txt").expect("Failed to read guesses");
-    let guesses_result: Vec<[u8; 5]> = guesses.lines().map(parse_word).collect();
+    let guesses_result: Vec<[u8; 5]> = guesses.par_lines().map(parse_word).collect();
 
     let answers = fs::read_to_string("data/answers.txt").expect("Failed to read answers");
-    let answers_result: Vec<[u8; 5]> = answers.lines().map(parse_word).collect();
+    let answers_result: Vec<[u8; 5]> = answers.par_lines().map(parse_word).collect();
 
     // Both consts built into one string, one write — nothing gets clobbered.
     // Fixed-size arrays (not Vec) so these are genuinely const-compatible.
