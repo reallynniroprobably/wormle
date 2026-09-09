@@ -15,5 +15,5 @@ opt-level = 3        # 0-3, "s" (size), "z" (min size). 3 is max speed, default 
 lto = "fat"           # "fat" (whole-program LTO), "thin" (faster to compile, most of the benefit), or false
 codegen-units = 1     # Fewer units = better optimization, slower compile. Default is 16.
 panic = "abort"       # Skips unwinding machinery — smaller/faster, but no catch_unwind
-strip = false          # Strips symbols/debuginfo from the binary — smaller binary
-debug = true        # No debug info in release (default false already)
+strip = true          # Strips symbols/debuginfo from the binary — smaller binary
+debug = false       # No debug info in release (default false already)
