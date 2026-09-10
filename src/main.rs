@@ -10,14 +10,11 @@ fn main() -> Result<()> {
         (GUESSES[i], 0.0_f32)
     });
     let answers: [Word; ANSWER_COUNT] = ANSWERS;
+    
     guesses.par_iter_mut().for_each(|(guess, avg_surprise)| {
         let mut cache: [f32; 243] = [0.0; 243];
         
-        for answer in &answers {
-            let states = evaluate(guess, answer);
-            cache[cached(&states) as usize] += 1.0;
-        }
-        // println!("Done all answers for guess {:?}", guess);
+        for answer in &answers { cache[evaluate(guess, answer) as usize] += 1.0; }
         
         let entropy: f32 = cache
             .iter()
@@ -48,7 +45,7 @@ enum LetterState {
 }
 
 #[inline(always)]
-fn evaluate(guess: &Word, answer: &Word) -> [LetterState; 5] {
+fn evaluate(guess: &Word, answer: &Word) -> u8 {
     let mut result = [LetterState::Absent; 5];
     let mut counts = [0u8; 26]; // Tracks unused letter frequencies in `answer`
 
@@ -74,13 +71,13 @@ fn evaluate(guess: &Word, answer: &Word) -> [LetterState; 5] {
         }
     }
 
-    result
+    cached(&result)
 }
 
 #[inline(always)]
 fn cached(states: &[LetterState; 5]) -> u8 {
     let mut code = 0u8;
-    
+
     for s in states {
         let digit: u8 = match s {
             LetterState::Absent => 0,
@@ -102,20 +99,14 @@ fn parse_code(code: &Word) -> String {
 
 #[cfg(test)]
 mod tests {
-    use crate::{LetterState, Word, evaluate, parse_word};
+    use crate::{Word, evaluate, parse_word};
 
     #[test]
     fn eval_test() {
         let guess: Word = parse_word("tarse");
         let answer: Word = parse_word("burst");
         let result = evaluate(&guess, &answer);
-        let expected = [
-            LetterState::Present,
-            LetterState::Absent,
-            LetterState::Correct,
-            LetterState::Correct,
-            LetterState::Absent
-        ];
+        let expected = 105u8;
         assert_eq!(result, expected)
     }
 }
