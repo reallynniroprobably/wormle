@@ -1,5 +1,3 @@
-use std::time::Instant;
-
 use anyhow::*;
 use rayon::prelude::*;
 
