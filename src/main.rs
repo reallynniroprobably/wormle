@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use anyhow::*;
 use rayon::prelude::*;
 
@@ -6,9 +8,7 @@ type Word = [u8; 5];
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
 fn main() -> Result<()> {
-    let mut guesses: [(Word, f32); GUESS_COUNT] = std::array::from_fn(|i| {
-        (GUESSES[i], 0.0_f32)
-    });
+    let mut guesses: [(Word, f32); GUESS_COUNT] = GUESSES;
     let answers: [Word; ANSWER_COUNT] = ANSWERS;
     
     guesses.par_iter_mut().for_each(|(guess, avg_surprise)| {

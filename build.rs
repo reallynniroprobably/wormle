@@ -12,7 +12,7 @@ fn main() {
     let dest_path = Path::new(&out_dir).join("data.rs"); // no leading slash
 
     let guesses = fs::read_to_string("data/guesses.txt").expect("Failed to read guesses");
-    let guesses_result: Vec<[u8; 5]> = guesses.par_lines().map(parse_word).collect();
+    let guesses_result: Vec<([u8; 5], f32)> = guesses.par_lines().map(|guess| (parse_word(guess), 0.0f32)).collect();
 
     let answers = fs::read_to_string("data/answers.txt").expect("Failed to read answers");
     let answers_result: Vec<[u8; 5]> = answers.par_lines().map(parse_word).collect();
@@ -20,7 +20,7 @@ fn main() {
     // Both consts built into one string, one write — nothing gets clobbered.
     // Fixed-size arrays (not Vec) so these are genuinely const-compatible.
     let output = format!(
-        "pub const GUESSES: [[u8; 5]; {}] = {:?};\n\
+        "pub const GUESSES: [([u8; 5], f32); {}] = {:?};\n\
          pub const ANSWERS: [[u8; 5]; {}] = {:?};\n\
          pub const ANSWER_COUNT: usize = {};\n\
          pub const GUESS_COUNT: usize = {};\n\
