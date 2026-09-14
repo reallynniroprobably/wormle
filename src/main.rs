@@ -35,57 +35,42 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-enum LetterState {
-    Correct,
-    Present,
-    Absent
-}
-
 #[inline(always)]
 fn evaluate(guess: &Word, answer: &Word) -> u8 {
-    let mut result = [LetterState::Absent; 5];
-    let mut counts = [0u8; 26]; // Tracks unused letter frequencies in `answer`
+    let mut counts = [0u8; 26];
+    let mut digits = [0u8; 5]; // 0 = Absent, 1 = Present, 2 = Correct
 
-    // Pass 1: Mark Correct (Green) matches & count remaining available letters in `answer`
+    // Pass 1: mark greens, tally leftover letters in `answer`
     for i in 0..5 {
-        if guess[i] == answer[i] {
-            result[i] = LetterState::Correct;
+        // SAFETY: i is always 0..5, well within bounds of both arrays.
+        let g = unsafe { *guess.get_unchecked(i) };
+        let a = unsafe { *answer.get_unchecked(i) };
+
+        if g == a {
+            unsafe { *digits.get_unchecked_mut(i) = 2; }
         } else {
-            // Fast ASCII index mapping assuming bytes 'a'-'z' or 'A'-'Z'
-            let idx = (answer[i] % 32 - 1) as usize; 
-            counts[idx] += 1;
+            let idx = (a - b'a') as usize;
+            unsafe { *counts.get_unchecked_mut(idx) += 1; }
         }
     }
 
-    // Pass 2: Mark Present (Yellow) matches without nested loops
+    // Pass 2: mark yellows
     for i in 0..5 {
-        if result[i] != LetterState::Correct {
-            let idx = (guess[i] % 32 - 1) as usize;
-            if counts[idx] > 0 {
-                result[i] = LetterState::Present;
-                counts[idx] -= 1;
+        if unsafe { *digits.get_unchecked(i) } != 2 {
+            let g = unsafe { *guess.get_unchecked(i) };
+            let idx = (g - b'a') as usize;
+            let c = unsafe { counts.get_unchecked_mut(idx) };
+            if *c > 0 {
+                unsafe { *digits.get_unchecked_mut(i) = 1; }
+                *c -= 1;
             }
         }
     }
 
-    cached(&result)
+    // Encode directly — no enum, no separate `cached()` call
+    digits.iter().fold(0u8, |code, &d| code * 3 + d)
 }
 
-#[inline(always)]
-fn cached(states: &[LetterState; 5]) -> u8 {
-    let mut code = 0u8;
-
-    for s in states {
-        let digit: u8 = match s {
-            LetterState::Absent => 0,
-            LetterState::Present => 1,
-            LetterState::Correct => 2,
-        };
-        code = code * 3 + digit;
-    }
-    code
-}
 
 fn parse_code(code: &Word) -> String {
     let mut word: String = String::new();
